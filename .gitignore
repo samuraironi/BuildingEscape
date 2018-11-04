@@ -1,0 +1,16 @@
+
+Intermediate/
+
+Binaries/
+
+Build/
+
+DerivedDataCache/
+
+Saved/
+
+Content/StarterContent/
+
+*_BuiltData.uasset
+
+*.VC.db
