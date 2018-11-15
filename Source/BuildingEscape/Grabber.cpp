@@ -10,8 +10,6 @@ UGrabber::UGrabber()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 
@@ -19,17 +17,8 @@ UGrabber::UGrabber()
 void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
-
-	UE_LOG(LogTemp, Warning, TEXT("Grabber report for duty"));
 	
-	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if(PhysicsHandle)
-	{ 
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("%s missing physics handle component"), *GetOwner()->GetName());
-	}
+	FindPhysicsComponent();
 
 	InpuntComponent = GetOwner()->FindComponentByClass<UInputComponent>();
 	if (InpuntComponent)
@@ -44,38 +33,40 @@ void UGrabber::BeginPlay()
 	}
 }
 
+void UGrabber::FindPhysicsComponent()
+{
+	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	if (PhysicsHandle)
+	{
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s missing physics handle component"), *GetOwner()->GetName());
+	}
+}
 
 // Called every frame
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
 
+const FHitResult UGrabber::GetFirstPhysicsBodyInReach()
+{
 	FVector PlayerViewPointLocation;
 	FRotator PlayerViewPointRotation;
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(OUT PlayerViewPointLocation, OUT PlayerViewPointRotation);
 
-	//FVector LineTraceEnd = PlayerViewPointLocation + FVector(0, Reach, 0);
 	FVector LineTraceEnd = PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Reach;
-
-	DrawDebugLine(
-		GetWorld(), 
-		PlayerViewPointLocation, 
-		LineTraceEnd, 
-		FColor(255, 0, 0), 
-		false, 
-		0.f, 
-		0.f, 
-		10.f
-	);
 
 	FCollisionQueryParams TraceParams(TEXT(""), false, GetOwner());
 
 	FHitResult Hit;
 	GetWorld()->LineTraceSingleByObjectType(
-		OUT Hit, 
-		PlayerViewPointLocation, 
-		LineTraceEnd, 
-		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody), 
+		OUT Hit,
+		PlayerViewPointLocation,
+		LineTraceEnd,
+		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
 		TraceParams
 	);
 
@@ -84,11 +75,13 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Line Trace hit: %s"), *(ActorHit->GetName()));
 	}
+	return Hit;
 }
 
 void UGrabber::Grab()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Grab key pressed"));
+	GetFirstPhysicsBodyInReach();
 }
 
 void UGrabber::Release()
