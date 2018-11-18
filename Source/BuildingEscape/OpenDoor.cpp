@@ -36,7 +36,7 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 
 	if (GetTotalMassOaActorOnPlate() > TriggerMass)
 	{
-		OnOpen.Broadcast();\
+		OnOpen.Broadcast();
 	}
 	else
 	{
